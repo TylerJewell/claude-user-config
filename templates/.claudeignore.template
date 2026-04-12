@@ -1,0 +1,23 @@
+# Generated Angular build artifacts — never read or edit these directly
+# Copy this file to your project root as .claudeignore and adjust paths as needed
+
+# Angular chunk files (lazy-loaded route bundles)
+**/src/main/resources/static-resources/chunk-*.js
+**/src/main/resources/static-resources/chunk-*.js.map
+
+# Angular main bundles (hashed filenames from previous builds)
+**/src/main/resources/static-resources/main-*.js
+**/src/main/resources/static-resources/main-*.js.map
+
+# Angular styles (hashed filenames from previous builds)
+**/src/main/resources/static-resources/styles-*.css
+**/src/main/resources/static-resources/styles-*.css.map
+
+# Angular component CSS source maps
+**/src/main/resources/static-resources/*.component.css.map
+
+# Add other generated/vendor directories here:
+# node_modules/
+# dist/
+# .gradle/
+# target/

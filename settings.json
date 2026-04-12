@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__akka__akka_local_start",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.claude/hooks/pre-akka-local-start.sh\""
+          }
+        ]
+      }
+    ]
+  }
+}
