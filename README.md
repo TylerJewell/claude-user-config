@@ -8,6 +8,7 @@ Tyler's portable Claude Code user configuration — global instructions, hooks, 
 |----------|-------------|---------|
 | `CLAUDE.md` | `~/.claude/CLAUDE.md` | Global instructions loaded in every Claude session |
 | `settings.json` | deep-merged into `~/.claude/settings.json` | Permissions, MCP servers, enabled plugins, marketplaces, default mode, and hooks |
+| `hooks/check-config-sync.sh` | `~/.claude/hooks/` | On SessionStart, auto-pulls this repo and re-runs install.sh if behind origin |
 | `hooks/pre-akka-local-start.sh` | `~/.claude/hooks/` | Blocks `akka_local_start` if runtime already running |
 | `hooks/post-angular-edit.sh` | `~/.claude/hooks/` | Reminds to run `ng build + copy` after frontend edits |
 | `skills/fe-build/` | `~/.claude/skills/fe-build/` | `/fe-build` skill for Angular + Akka build pipeline |
@@ -52,9 +53,11 @@ bash install.sh  # safe to re-run — deep-merges settings.json (repo wins, loca
 
 ## What the Hooks Do
 
-**`pre-akka-local-start`** — The Akka local runtime is a shared daemon. If one Claude session restarts it, all services from other sessions die. This hook checks if port 9889 is already in use and blocks the call with an explanation.
+**`check-config-sync`** (SessionStart) — Every new Claude Code session, this hook fetches `~/claude-user-config` and checks whether the checkout is behind origin. If behind AND the working tree is clean, it auto-pulls, re-runs `install.sh`, and prints a one-line reminder to restart Claude Code so the new config is loaded. If the working tree is dirty, it warns and skips auto-pull. Network failures and missing checkouts are silent — no noise on normal startup.
 
-**`post-angular-edit`** — After editing any file under `frontend/src/`, reminds about the `ng build → copy` step. The Angular source and the compiled static resources served by Java are separate — forgetting to rebuild leads to stale UI.
+**`pre-akka-local-start`** (PreToolUse) — The Akka local runtime is a shared daemon. If one Claude session restarts it, all services from other sessions die. This hook checks if port 9889 is already in use and blocks the call with an explanation.
+
+**`post-angular-edit`** (PostToolUse) — After editing any file under `frontend/src/`, reminds about the `ng build → copy` step. The Angular source and the compiled static resources served by Java are separate — forgetting to rebuild leads to stale UI.
 
 ## What the Skills Do
 
