@@ -1,4 +1,32 @@
 {
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit",
+      "Bash",
+      "Write",
+      "mcp__*",
+      "mcp__akka__*"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "akka"
+  ],
+  "enabledPlugins": {
+    "akka@akka-ai-marketplace": true,
+    "frontend-design@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "akka-ai-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "akka/ai-marketplace"
+      },
+      "autoUpdate": true
+    }
+  },
+  "defaultMode": "acceptEdits",
   "hooks": {
     "PreToolUse": [
       {

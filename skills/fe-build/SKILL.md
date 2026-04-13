@@ -13,8 +13,10 @@ Builds the Angular frontend and copies compiled assets to the Java static resour
 1. Run: `cd compliance-surface/frontend && npx ng build --configuration development`
 2. If compilation fails: report the TypeScript/template error lines exactly, stop here
 3. If success: `cp -r dist/frontend/browser/* ../src/main/resources/static-resources/`
-4. Report which source files were built and whether a Java restart is needed
-5. Java restart is needed ONLY if `.java` or `application.conf` files also changed in this session
+4. Copy built files: `cp -r dist/frontend/browser/* ../src/main/resources/static-resources/`
+5. ALWAYS restart the Akka service using `akka_local_run_service` — Akka serves static files
+   from `target/classes/` (compiled classpath), not `src/main/resources/` directly. The copy
+   in step 4 only takes effect after recompile+restart. Use the MCP tool, not raw mvn.
 
 ### prod
 1. Run: `cd compliance-surface/frontend && npx ng build`
@@ -36,6 +38,8 @@ Builds the Angular frontend and copies compiled assets to the Java static resour
 - Static resources: `compliance-surface/src/main/resources/static-resources/`
 
 ## Common issues
-- **ng serve misses file changes on Windows**: Kill the process and restart if changes aren't reflected
+- **ng serve misses file changes on Windows**: the watcher sometimes doesn't pick up edits
+  from external tools. Kill the process (`netstat -ano | findstr :4200` then `taskkill /PID <pid> /F`) and restart.
 - **Stale UI after build**: hard refresh in browser (Ctrl+Shift+R) to bypass cache
-- **TypeScript error after adding a new component**: verify the route's loadComponent import and selector
+- **TypeScript error after adding a new component**: check that it's listed in the route's
+  `loadComponent` import and that the selector matches exactly
