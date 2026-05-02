@@ -19,7 +19,7 @@ Prefer scoped prefixes rather than broad shells or arbitrary interpreters.
 - `git commit -m`
 - `git switch -c`
 - `git clone https://github.com/`
-- `git push origin`
+- `git push origin` covers branch-specific pushes such as `git push origin master` and `git push origin ux-refactor`
 - `git push -u origin`
 - `git ls-remote --heads origin`
 - `gh repo view`
