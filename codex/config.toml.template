@@ -1,0 +1,12 @@
+# Portable Codex managed configuration block.
+# Install into ~/.codex/config.toml with install-codex.ps1 or install-codex.sh.
+#
+# Keep auth.json, sessions, logs, history, SQLite state, and caches out of git.
+
+[windows]
+sandbox = "unelevated"
+
+[mcp_servers.akka]
+command = "akka"
+args = ["mcp", "serve", "--disable-prompt"]
+default_tools_approval_mode = "approve"

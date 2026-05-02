@@ -1,0 +1,42 @@
+# Codex project instructions
+
+## Core behavior
+
+- Prefer small, scoped changes that match the existing codebase.
+- Use `rg` / `rg --files` before broad file reads.
+- Do not revert user changes unless explicitly asked.
+- Use `apply_patch` for manual edits.
+- Validate with the narrowest reliable command first, then broader checks before finishing.
+- Never commit secrets, generated logs, local state, or machine-specific runtime files.
+
+## Akka SDK rules
+
+- Use Akka SDK 3.4+ package conventions:
+  - domain records/events in `domain`
+  - entities, views, workflows, agents, consumers, timed actions in `application`
+  - HTTP/gRPC endpoints and API DTOs in `api`
+- Use `akka.*` imports, never `io.akka.*` for Akka SDK base classes.
+- Never use `invokeAsync()` for user-facing writes. Use `.invoke()` so failures propagate.
+- Endpoint integration tests use `httpClient`, not `componentClient`.
+- Views over event-sourced entities use `onEvent(Event)`.
+- Views over key-value entities use `onUpdate(State)`.
+- HTTP endpoints must have `@Acl`.
+- Workflows require current docs review before first workflow coding in a session.
+
+## Local development
+
+- Use `tools/dev-demo` when demo seed data is required.
+- Frontend UX work should run through the Vite dev server for hot reloads.
+- Avoid starting or restarting Akka if another local runtime is already in use unless explicitly requested.
+
+## Validation
+
+Common commands:
+
+```powershell
+npm.cmd run build
+npm.cmd run lint:styles
+mvn.cmd -pl compliance-surface -am compile -DskipTests
+```
+
+For Akka SDK projects, prefer targeted tests first, then full verification when risk warrants it.
