@@ -104,3 +104,10 @@ Print the verdict line and the report path. Then list the findings, most severe
 first. Do not act on them — the user decides what to fix and whether to push.
 
 Never push as part of this skill.
+
+## How this is enforced
+
+The `pre-akka-push` hook denies a `git push` from an akka-org feature branch unless
+this skill's report exists for the branch, is newer than the branch tip, and says
+`READY TO PUSH`. So a report that goes stale behind new commits stops being
+sufficient — re-run the skill after amending the branch.

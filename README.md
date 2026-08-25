@@ -11,6 +11,7 @@ Tyler's portable Claude Code and Codex user configuration - global instructions,
 | `hooks/check-config-sync.sh` | `~/.claude/hooks/` | On SessionStart, auto-pulls this repo and re-runs install.sh if behind origin |
 | `hooks/pre-akka-local-start.sh` | `~/.claude/hooks/` | Blocks `akka_local_start` if runtime already running |
 | `hooks/post-angular-edit.sh` | `~/.claude/hooks/` | Reminds to run `ng build + copy` after frontend edits |
+| `hooks/pre-akka-push.sh` | `~/.claude/hooks/` | Blocks `git push` of a feature branch in an `akka` org repo until `/akka-pr-review` has passed on it |
 | `skills/fe-build/` | `~/.claude/skills/fe-build/` | `/fe-build` skill for Angular + Akka build pipeline |
 | `skills/akka-pr-review/` | `~/.claude/skills/akka-pr-review/` | `/akka-pr-review` skill: independent pre-push review of a branch headed for an `akka` org PR |
 | `robert-mcp/` (cloned, gitignored) | `go install` + registers in `~/.claude.json`, symlinks `rw-*` assets into `~/.claude/` | 82 narrow MCP dev tools (git/go/cargo/mvn/sbt/gh/docker/buf/jq/akka) plus `rw-walk-through` skill. Requires Go on PATH; on Windows, requires Developer Mode enabled for symlink creation. |
@@ -89,6 +90,8 @@ bash install-codex.sh --dry-run
 **`check-config-sync`** (SessionStart) - Every new Claude Code session, this hook fetches `~/claude-user-config` and checks whether the checkout is behind origin. If behind and the working tree is clean, it auto-pulls, re-runs `install.sh`, and prints a one-line reminder to restart Claude Code so the new config is loaded. If the working tree is dirty, it warns and skips auto-pull. Network failures and missing checkouts are silent to avoid startup noise.
 
 **`pre-akka-local-start`** (PreToolUse) - The Akka local runtime is a shared daemon. If one Claude session restarts it, all services from other sessions die. This hook checks if port 9889 is already in use and blocks the call with an explanation.
+
+**`pre-akka-push`** (PreToolUse) - Makes the akka-org review rule enforced rather than advisory. Before any Bash/PowerShell `git push`, it checks whether `origin` is under `github.com/akka/` and the branch is not `main`/`master`. If so it requires `~/.claude/reviews/<repo>-<branch>-review.md` to exist, to be newer than the branch tip, and to carry a `READY TO PUSH` verdict — otherwise the push is denied with the reason. A report older than the tip reviewed code that is no longer being pushed, so it is treated as absent. Everything else exits silently. Override with `AKKA_PR_REVIEW_SKIP=1 git push ...`.
 
 **`post-angular-edit`** (PostToolUse) - After editing any file under `frontend/src/`, reminds about the `ng build -> copy` step. The Angular source and the compiled static resources served by Java are separate, so forgetting to rebuild leads to stale UI.
 

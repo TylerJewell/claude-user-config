@@ -75,6 +75,15 @@
             "command": "bash \"$HOME/.claude/hooks/pre-akka-local-start.sh\""
           }
         ]
+      },
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.claude/hooks/pre-akka-push.sh\""
+          }
+        ]
       }
     ]
   }
