@@ -1,5 +1,19 @@
 # Tyler's Global Claude Code Guidelines
 
+## Never Publish to claude.ai — Render HTML Locally
+
+Do not call the Artifact tool. Do not publish, upload, or host anything on claude.ai.
+This applies to every project and every session, with no exceptions.
+
+HTML deliverables are written to a local file in the project and opened from disk.
+Report the file path. Do not offer a hosted link as an alternative.
+
+Consequences for how local HTML is written:
+- No claude.ai CSP applies, so Google Fonts and other external `<link>` resources are
+  fine. Match whatever the project already does.
+- Write a complete document: `<!DOCTYPE html>`, `<html>`, `<head>`, `<body>`. The
+  Artifact wrapper that supplied those is not in play.
+
 <!-- The four "LLM Discipline" principles below are adapted from
      https://github.com/forrestchang/andrej-karpathy-skills
      (Karpathy's observations on LLM coding pitfalls). -->
@@ -19,6 +33,33 @@ Minimum code that solves the problem. Nothing speculative.
 - No error handling for impossible scenarios.
 - If 200 lines could be 50, rewrite it.
 - Test: would a senior engineer say this is overcomplicated? If yes, simplify.
+
+## Comments Describe the Code, Not the Session
+
+Write comments for a reader who arrives in six months with no memory of how the
+code got here. They describe what is true now and why it is that way.
+
+Never write a comment that narrates the work:
+- ❌ "This was two parallel lists — under concurrency that mispaired."
+- ❌ "Fixed: the regex used to anchor on indentation."
+- ❌ "Previously we defaulted this; now it errors."
+- ❌ "Closes audit gap 1." / "Addresses the review finding."
+- ✅ "Paired in one record because the walked count is derived from the pairing."
+- ✅ "Anchored at line start: source is trimmed before this sees it."
+- ✅ "An unreadable reply errors rather than defaulting — a fabricated score
+     moves the distribution silently."
+
+The test is whether the comment still reads correctly if the history is deleted.
+"It never failed a test because the fakes appended in order" is about a past bug.
+"Order is not guaranteed across threads" is about the code.
+
+Rationale belongs in comments; chronology belongs in commit messages. A commit
+message is the right place for "this used to be wrong and here is how" — it is
+attached to the change, not to the line, and it does not decay.
+
+Exception: a comment may name a past incident when the incident is the *reason a
+guard exists* and the guard looks unnecessary without it. Keep it to one clause,
+state it as a property, and do not describe the fix.
 
 ## Surgical Changes
 Touch only what you must. Clean up only your own mess.
@@ -85,3 +126,13 @@ Rules:
 ## Security
 - Never write code with SQL injection, XSS, command injection, or path traversal
 - Only validate at system boundaries — trust internal code and framework guarantees
+
+## Akka Org Pull Requests — Independent Pre-Push Review
+
+Work in a repository whose remote is in the `akka` GitHub organization gets an
+independent review before the branch is pushed for a PR. Run `/akka-pr-review`
+once the branch is complete and before `git push`.
+
+The review runs in a fresh agent that is not told how the change was made, so it
+forms its own judgment about the root cause. It is read-only: it never edits,
+commits, or switches branches.

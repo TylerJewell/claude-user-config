@@ -32,6 +32,31 @@ for skill_dir in "$REPO_DIR/skills"/*/; do
     echo "✓ skills/$skill_name/ → ~/.claude/skills/$skill_name/"
 done
 
+# ── robert-mcp (clone, build, register, install assets) ─────────────────────
+# robert-mcp is cloned as a subdirectory of this repo (gitignored). It's
+# updated on every install.sh run so machines stay in sync with upstream.
+# Skipped gracefully if `go` isn't on PATH.
+RW_DIR="$REPO_DIR/robert-mcp"
+if ! command -v go >/dev/null 2>&1; then
+    echo "⚠ go not found on PATH — skipping robert-mcp install"
+else
+    if [ -d "$RW_DIR/.git" ]; then
+        (cd "$RW_DIR" && git pull --ff-only 2>&1 | sed 's/^/  /')
+        echo "✓ robert-mcp pulled"
+    else
+        git clone https://github.com/akka/robert-mcp.git "$RW_DIR" 2>&1 | sed 's/^/  /'
+        echo "✓ robert-mcp cloned"
+    fi
+    (cd "$RW_DIR" && go install .)
+    GOBIN="$(go env GOBIN)"
+    [ -z "$GOBIN" ] && GOBIN="$(go env GOPATH)/bin"
+    RW_BIN="$GOBIN/robert-mcp"
+    [ -x "$RW_BIN.exe" ] && RW_BIN="$RW_BIN.exe"
+    "$RW_BIN" register --user --config "$RW_DIR/config.yaml" | sed 's/^/  /'
+    "$RW_BIN" install --source "$RW_DIR" | sed 's/^/  /'
+    echo "✓ robert-mcp registered + assets installed"
+fi
+
 # ── settings.json (deep merge: repo wins on tracked keys) ───────────────────
 SETTINGS_PATH="$CLAUDE_DIR/settings.json"
 REPO_SETTINGS="$REPO_DIR/settings.json"

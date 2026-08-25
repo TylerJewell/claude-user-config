@@ -4,13 +4,38 @@
       "Read",
       "Edit",
       "Bash",
+      "PowerShell",
       "Write",
-      "mcp__*",
-      "mcp__akka__*"
-    ]
+      "WebSearch",
+      "WebFetch",
+      "mcp__akka__*",
+      "mcp__plugin_akka_akka__*",
+      "mcp__robert-mcp__*",
+      "mcp__claude_ai_Akka_MCP_Gateway__*",
+      "mcp__claude_ai_Asana__*",
+      "mcp__claude_ai_Atlassian__*",
+      "mcp__claude_ai_Box__*",
+      "mcp__claude_ai_Canva__*",
+      "mcp__claude_ai_Cloudflare_Developer_Platform__*",
+      "mcp__claude_ai_Figma__*",
+      "mcp__claude_ai_Gmail__*",
+      "mcp__claude_ai_Google_Calendar__*",
+      "mcp__claude_ai_Google_Cloud_BigQuery__*",
+      "mcp__claude_ai_Google_Drive__*",
+      "mcp__claude_ai_HubSpot__*",
+      "mcp__claude_ai_Intercom__*",
+      "mcp__claude_ai_Linear__*",
+      "mcp__claude_ai_Notion__*",
+      "mcp__claude_ai_Reo_Dev__*",
+      "mcp__claude_ai_Slack__*",
+      "mcp__claude_ai_Zoho__*",
+      "mcp__claude_ai_monday_com__*"
+    ],
+    "defaultMode": "auto"
   },
-  "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": [
+  "enableAllProjectMcpServers": false,
+  "enabledMcpjsonServers": [],
+  "disabledMcpjsonServers": [
     "akka"
   ],
   "enabledPlugins": {
@@ -26,7 +51,10 @@
       "autoUpdate": true
     }
   },
-  "defaultMode": "acceptEdits",
+  "effortLevel": "medium",
+  "tui": "fullscreen",
+  "skipWorkflowUsageWarning": true,
+  "agentPushNotifEnabled": true,
   "hooks": {
     "SessionStart": [
       {
@@ -40,7 +68,7 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "mcp__akka__akka_local_start",
+        "matcher": "mcp__.*akka__akka_local_start",
         "hooks": [
           {
             "type": "command",

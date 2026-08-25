@@ -12,6 +12,8 @@ Tyler's portable Claude Code and Codex user configuration - global instructions,
 | `hooks/pre-akka-local-start.sh` | `~/.claude/hooks/` | Blocks `akka_local_start` if runtime already running |
 | `hooks/post-angular-edit.sh` | `~/.claude/hooks/` | Reminds to run `ng build + copy` after frontend edits |
 | `skills/fe-build/` | `~/.claude/skills/fe-build/` | `/fe-build` skill for Angular + Akka build pipeline |
+| `skills/akka-pr-review/` | `~/.claude/skills/akka-pr-review/` | `/akka-pr-review` skill: independent pre-push review of a branch headed for an `akka` org PR |
+| `robert-mcp/` (cloned, gitignored) | `go install` + registers in `~/.claude.json`, symlinks `rw-*` assets into `~/.claude/` | 82 narrow MCP dev tools (git/go/cargo/mvn/sbt/gh/docker/buf/jq/akka) plus `rw-walk-through` skill. Requires Go on PATH; on Windows, requires Developer Mode enabled for symlink creation. |
 | `codex/` | `~/.codex` and project roots | Portable Codex MCP/config templates and AGENTS.md guidance |
 | `install-codex.ps1` | run from repo root | Windows Codex installer; preserves local config and secrets |
 | `install-codex.sh` | run from repo root | macOS/Linux/Git Bash Codex installer; preserves local config and secrets |
@@ -97,6 +99,14 @@ bash install-codex.sh --dry-run
 - `prod`: `ng build` (optimized) + copy
 - `serve`: starts `ng serve` on port 4200 with proxy config
 
+**`/akka-pr-review`** - Run on a finished branch before pushing it for a PR in the
+`akka` GitHub org. It spawns a fresh agent that is given the *problem* but never the
+*fix*, so it derives the root cause itself instead of grading the change against the
+approach that produced it. The reviewer is read-only apart from its report, which it
+writes to `~/.claude/reviews/<repo>-<branch>-review.md` — outside every repo, so it
+cannot land on the branch. Output is a verdict (READY TO PUSH / NEEDS WORK / NEEDS
+HUMAN DECISION) plus findings tagged `[blocker]` / `[should-fix]` / `[nit]`.
+
 ## Global CLAUDE.md Principles
 
 ### LLM Discipline
@@ -113,3 +123,6 @@ bash install-codex.sh --dry-run
 - **Environment variables**: API keys follow `{PROVIDER}_{SERVICE}_API_KEY` such as `GOOGLE_AI_GEMINI_API_KEY`, `VERTEX_AI_API_KEY`, `ANTHROPIC_API_KEY`, and `OPENAI_API_KEY`; never use generic names like `GOOGLE_API_KEY`
 - **Git safety**: never force-push main, never amend published commits, always stage by name
 - **Terse responses**: no trailing summaries, no emojis, diff speaks for itself
+- **No claude.ai publishing**: HTML deliverables are written to a local file and opened from disk; the Artifact tool is never called
+- **Comments describe the code, not the session**: rationale belongs in comments, chronology belongs in commit messages
+- **Akka org PRs**: run `/akka-pr-review` before pushing a branch for a PR in the `akka` org

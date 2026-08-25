@@ -4,7 +4,7 @@
 # Keep auth.json, sessions, logs, history, SQLite state, and caches out of git.
 
 [windows]
-sandbox = "unelevated"
+sandbox = "elevated"
 
 [mcp_servers.akka]
 command = "akka"
