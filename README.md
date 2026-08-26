@@ -14,6 +14,7 @@ Tyler's portable Claude Code and Codex user configuration - global instructions,
 | `hooks/pre-akka-push.sh` | `~/.claude/hooks/` | Blocks `git push` of a feature branch in an `akka` org repo until `/akka-pr-review` has passed on it |
 | `skills/fe-build/` | `~/.claude/skills/fe-build/` | `/fe-build` skill for Angular + Akka build pipeline |
 | `skills/akka-pr-review/` | `~/.claude/skills/akka-pr-review/` | `/akka-pr-review` skill: independent pre-push review of a branch headed for an `akka` org PR |
+| `akka-mcp-gateway` (registered by `install.sh`) | `~/.claude.json` at user scope | Company MCP gateway at `https://mcp.akka.services/mcp` — Slack, Gmail, Google Calendar, Google Drive, HubSpot, Okta, and Groundcover. Requires the `claude` CLI on PATH. Authentication is per-machine: run `/mcp` and sign in through Okta. |
 | `robert-mcp/` (cloned, gitignored) | `go install` + registers in `~/.claude.json`, symlinks `rw-*` assets into `~/.claude/` | 82 narrow MCP dev tools (git/go/cargo/mvn/sbt/gh/docker/buf/jq/akka) plus `rw-walk-through` skill. Requires Go on PATH; on Windows, requires Developer Mode enabled for symlink creation. |
 | `codex/` | `~/.codex` and project roots | Portable Codex MCP/config templates and AGENTS.md guidance |
 | `install-codex.ps1` | run from repo root | Windows Codex installer; preserves local config and secrets |

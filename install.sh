@@ -57,6 +57,23 @@ else
     echo "✓ robert-mcp registered + assets installed"
 fi
 
+# ── akka-mcp-gateway (company MCP gateway) ──────────────────────────────────
+# Registered at user scope so every project sees it, matching robert-mcp.
+# Authentication is per-machine and interactive — run /mcp in Claude Code and
+# sign in through Okta. No credential belongs in this repo.
+# The scope is matched, not just the name: a registration that exists only at
+# local scope is confined to one project, which is the state this replaces.
+GATEWAY_NAME="akka-mcp-gateway"
+GATEWAY_URL="https://mcp.akka.services/mcp"
+if ! command -v claude >/dev/null 2>&1; then
+    echo "⚠ claude not found on PATH — skipping $GATEWAY_NAME registration"
+elif claude mcp get "$GATEWAY_NAME" 2>/dev/null | grep -q "User config"; then
+    echo "✓ $GATEWAY_NAME already registered at user scope"
+else
+    claude mcp add --transport http --scope user "$GATEWAY_NAME" "$GATEWAY_URL" 2>&1 | sed 's/^/  /'
+    echo "✓ $GATEWAY_NAME registered — run /mcp to authenticate"
+fi
+
 # ── settings.json (deep merge: repo wins on tracked keys) ───────────────────
 SETTINGS_PATH="$CLAUDE_DIR/settings.json"
 REPO_SETTINGS="$REPO_DIR/settings.json"
