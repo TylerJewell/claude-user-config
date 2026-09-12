@@ -74,6 +74,25 @@ else
     echo "✓ $GATEWAY_NAME registered — run /mcp to authenticate"
 fi
 
+# ── google-sheets (personal Google Workspace, Tyler's personal Gmail) ───────
+# Google's official remote Sheets MCP server. Registered at user scope so it's
+# available in every project. Authentication is per-machine: user must create
+# an OAuth 2.0 Web-application client in Google Cloud Console (redirect URI
+# https://claude.ai/api/mcp/auth_callback), enable the Sheets API and Sheets
+# MCP API, then run /mcp in Claude Code and paste Client ID + Secret at the
+# prompt. No credential belongs in this repo. Tied to tylerjewell@gmail.com,
+# not any akka.io account.
+SHEETS_NAME="google-sheets"
+SHEETS_URL="https://sheetsmcp.googleapis.com/mcp/v1"
+if ! command -v claude >/dev/null 2>&1; then
+    echo "⚠ claude not found on PATH — skipping $SHEETS_NAME registration"
+elif claude mcp get "$SHEETS_NAME" 2>/dev/null | grep -q "User config"; then
+    echo "✓ $SHEETS_NAME already registered at user scope"
+else
+    claude mcp add --transport http --scope user "$SHEETS_NAME" "$SHEETS_URL" 2>&1 | sed 's/^/  /'
+    echo "✓ $SHEETS_NAME registered — run /mcp to authenticate"
+fi
+
 # ── settings.json (deep merge: repo wins on tracked keys) ───────────────────
 SETTINGS_PATH="$CLAUDE_DIR/settings.json"
 REPO_SETTINGS="$REPO_DIR/settings.json"
