@@ -74,6 +74,38 @@ else
     echo "✓ $GATEWAY_NAME registered — run /mcp to authenticate"
 fi
 
+# ── mcp-gsheets (Google Sheets via personal service account) ────────────────
+# Uses freema/mcp-gsheets (Node stdio server) authenticated with a Google Cloud
+# service account key. Tied to Tyler's personal Google Cloud project, not any
+# akka.io account.
+#
+# Per-machine prerequisite (do these once on each machine):
+#   1. Download the service account JSON key from the sheets-mcp GCP project
+#      and place it at $HOME/.gcp/mcp-gsheets-key.json (600 perms).
+#   2. Share any Google Sheet you want Claude to touch with the service
+#      account's email: mcp-gsheets@sheets-mcp-508419.iam.gserviceaccount.com
+#
+# The key never lives in this repo. Registration is skipped gracefully if the
+# key file isn't present on this machine.
+SHEETS_NAME="mcp-gsheets"
+SHEETS_KEY="$HOME/.gcp/mcp-gsheets-key.json"
+SHEETS_PROJECT="sheets-mcp-508419"
+if ! command -v claude >/dev/null 2>&1; then
+    echo "⚠ claude not found on PATH — skipping $SHEETS_NAME registration"
+elif ! command -v npx >/dev/null 2>&1; then
+    echo "⚠ npx not found on PATH — skipping $SHEETS_NAME registration"
+elif [ ! -f "$SHEETS_KEY" ]; then
+    echo "⚠ $SHEETS_KEY not found — skipping $SHEETS_NAME (see install.sh comment for setup)"
+elif claude mcp get "$SHEETS_NAME" 2>/dev/null | grep -q "User config"; then
+    echo "✓ $SHEETS_NAME already registered at user scope"
+else
+    claude mcp add --scope user "$SHEETS_NAME" \
+        -e "GOOGLE_PROJECT_ID=$SHEETS_PROJECT" \
+        -e "GOOGLE_APPLICATION_CREDENTIALS=$SHEETS_KEY" \
+        -- npx -y mcp-gsheets@latest 2>&1 | sed 's/^/  /'
+    echo "✓ $SHEETS_NAME registered"
+fi
+
 # ── settings.json (deep merge: repo wins on tracked keys) ───────────────────
 SETTINGS_PATH="$CLAUDE_DIR/settings.json"
 REPO_SETTINGS="$REPO_DIR/settings.json"
