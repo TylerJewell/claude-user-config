@@ -61,7 +61,7 @@ Codex command approvals are intentionally documented in `codex/command-approvals
 
 ## Subagents
 
-`settings.json` sets `CLAUDE_CODE_SUBAGENT_MODEL=haiku`, so every subagent runs on the cheaper model. It overrides a model set in an agent's own file, so a project whose agents need a stronger model sets its own value in that project's `.claude/settings.local.json`.
+`settings.json` sets `CLAUDE_CODE_SUBAGENT_MODEL=haiku`, so every subagent runs on the cheaper model. It overrides a model set in an agent's own file or on a call, so a project that chooses its agents' models sets `CLAUDE_CODE_SUBAGENT_MODEL` to an empty string in its own `.claude/settings.local.json` (a project value overrides the user value). `ai-console` does this: its agents are `model: inherit` and its rules pick the model per call. To check that an override took effect, read the `model` field on the subagent's messages in the session transcript.
 
 ## Update
 
