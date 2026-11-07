@@ -96,6 +96,10 @@ Projects use a file-based memory at `~/.claude/projects/<project>/memory/`.
 - Stage specific files by name, never `git add -A` blindly
 - Check `git status` before any commit to confirm what will be staged
 
+## Finish Clean
+
+When a commit and push are done, nothing is left behind: no stash, untracked or stale file, unmerged branch, backlog list or open question carried forward. Each item is handled in the session or dropped. When Tyler says an item can be ignored, drop it, remove it from memory, and never raise it again.
+
 ## Response Style
 - Keep responses short and direct — the user can read diffs
 - No trailing summaries of what you just did
