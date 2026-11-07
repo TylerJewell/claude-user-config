@@ -20,7 +20,7 @@ Consequences for how local HTML is written:
 
 ## Think Before Coding
 Don't assume. Don't hide confusion. Surface tradeoffs.
-- State assumptions explicitly. If uncertain, ask.
+- State assumptions explicitly.
 - If multiple interpretations exist, present them — don't pick silently.
 - If a simpler approach exists, say so. Push back when warranted.
 - If something is unclear, stop. Name what's confusing. Ask.
@@ -31,7 +31,7 @@ Minimum code that solves the problem. Nothing speculative.
 - No abstractions for single-use code.
 - No "flexibility" or "configurability" that wasn't requested.
 - No error handling for impossible scenarios.
-- If 200 lines could be 50, rewrite it.
+- If code you wrote runs 200 lines and could be 50, rewrite it.
 - Test: would a senior engineer say this is overcomplicated? If yes, simplify.
 
 ## Comments Describe the Code, Not the Session
@@ -75,7 +75,6 @@ Define success criteria. Loop until verified.
 - "Add validation" → write tests for invalid inputs, then make them pass.
 - "Fix the bug" → write a test that reproduces it, then make it pass.
 - "Refactor X" → ensure tests pass before and after.
-- For multi-step tasks, state a brief plan: `1. step → verify: check` per line.
 - Strong criteria let you loop independently. "Make it work" requires constant clarification.
 
 ## Grep First — Never Read Large Files Whole
@@ -86,14 +85,13 @@ Before reading any source file, estimate its size. If a file is likely > 200 lin
 
 ## Memory System
 Projects use a file-based memory at `~/.claude/projects/<project>/memory/`.
-- Always check MEMORY.md at session start for non-obvious context
 - Save feedback, recurring patterns, and project state as they emerge
 - Never save things derivable from reading the code (imports, class names, etc.)
 - Verify memory claims before acting on them — memory can be stale
 
 ## Git Safety
 - Never `git push --force` to main/master without explicit user request
-- Never `--no-verify` unless user explicitly asks
+- Never `--no-verify` unless user explicitly asks or the repo's CLAUDE.md records standing consent for that repo
 - Always create NEW commits — never amend unless user asks
 - Stage specific files by name, never `git add -A` blindly
 - Check `git status` before any commit to confirm what will be staged
@@ -123,6 +121,25 @@ Rules:
 - Before assuming an env var name, check the Akka `akka-context/sdk/model-provider-details.html.md` reference or grep the project for existing uses.
 - When a user says "use my X key from env vars" and the specific var is not obvious, ask — don't guess.
 
+## Cross-Project Standing Rules
+
+Corrections Tyler has given in more than one project, collected here so every project starts with them.
+
+- **Prose is declarative and plain.** Complete sentences, no hype, no padding, no quips. A simple
+  explanation aims at an intelligent layperson, never a child.
+- **Never write prose Tyler did not author into his documents, and never restructure them.** A Google Doc
+  that has been shared is edited in place, or Tyler is handed the text.
+- **Never use Tyler's model API keys for live model calls** unless he explicitly asks. Use scripted,
+  stubbed or recorded output.
+- **Open a page in a browser only when Tyler asks, and only for that request.** Render HTML to a local file and
+  report the path; a later rebuild does not reopen it.
+- **Check HTML on a phone before it is sent to anyone.** The `/html-phone-check` skill renders a page at phone
+  widths with scripts on and off. Tyler's machine has `prefers-reduced-motion` on, so an animation guarded by
+  that query looks like "nothing animates" there: test motion with it off.
+- **On Windows, `python` and `python3` are Microsoft Store stubs.** Use `py -3`, with
+  `PYTHONIOENCODING=utf-8` for scripts that print. The hooks and installers in this repo find a working Python
+  with `hooks/_python.sh`.
+
 ## Security
 - Never write code with SQL injection, XSS, command injection, or path traversal
 - Only validate at system boundaries — trust internal code and framework guarantees
@@ -136,3 +153,21 @@ once the branch is complete and before `git push`.
 The review runs in a fresh agent that is not told how the change was made, so it
 forms its own judgment about the root cause. It is read-only: it never edits,
 commits, or switches branches.
+
+## robert-mcp tooling (prefer over Bash)
+
+The `robert-mcp` MCP server exposes narrow, purpose-built tools. Use them in place of Bash for the operations
+they cover. Tool schemas are deferred: load one with ToolSearch, using the full name from the deferred tool list
+(`select:mcp__robert-mcp__git_log`), before calling it.
+
+Coverage by prefix: `git_*` (everything except push, remote and bundle), `gh_*` (pr_{list,view,checks,
+review_comment,review_submit}, issue_{list,view,comment}, api GET), `go_*`, `gopls_*`, `cargo_*`, `rustup_*`,
+`mvn_*`, `sbt_*`, `docker_*`, `buf_*`, `akka_release_summary`, `jq_file`.
+
+Replacements: any `git <verb>` that is not push-family becomes `git_<verb>`; `go mod tidy|get|list` becomes
+`go_mod_tidy|go_get|go_list`; `cargo <verb>` becomes `cargo_<verb>`; `mvn <goal>` becomes `mvn_<goal>` (`clean: true`
+for `mvn clean <goal>`); `jq '...' file.jsonl` becomes `jq_file`; `gh pr view N` becomes `gh_pr_view`;
+`docker ps|inspect` becomes `docker_ps|docker_inspect`.
+
+Bash is still appropriate for `ls`, `cat`, `tail`, `head` and `wc` on local files, paths outside the configured
+allowed_paths, and one-shot pipelines that combine operations across families.
