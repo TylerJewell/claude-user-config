@@ -14,6 +14,7 @@ Tyler's portable Claude Code and Codex user configuration - global instructions,
 | `hooks/pre-akka-push.sh` | `~/.claude/hooks/` | Blocks `git push` of a feature branch in an `akka` org repo until `/akka-pr-review` has passed on it |
 | `skills/fe-build/` | `~/.claude/skills/fe-build/` | `/fe-build` skill for Angular + Akka build pipeline |
 | `skills/akka-pr-review/` | `~/.claude/skills/akka-pr-review/` | `/akka-pr-review` skill: independent pre-push review of a branch headed for an `akka` org PR |
+| `install.sh` (git step) | `git config --global` | Sets `http.postBuffer` to 150 MB when unset, so pushes of large repos do not fail with HTTP 408 |
 | `skills/html-phone-check/` | `~/.claude/skills/html-phone-check/` | `/html-phone-check`: renders an HTML page at phone widths with scripts on and off (WebKit and Chromium) and reports sideways scroll, missing text and script errors; run before sending a page |
 | `skills/akka-presentation/` | `~/.claude/skills/akka-presentation/` | Tyler's standard for every deck, keynote, briefing and narrated demo film: storyboard first, one idea per scene, the Akka visual language, complete plain sentences |
 | `hooks/_python.sh` | `~/.claude/hooks/` | Sourced by the hooks and installers to find a working Python 3. On Windows `python3` is a Store stub that does nothing, so it tries `py -3` first |

@@ -112,6 +112,14 @@ else
     echo "✓ $SHEETS_NAME registered"
 fi
 
+# ── git: a large push buffer ────────────────────────────────────────────────
+# Pushes of large repos (the competition repo's decks and images) fail with HTTP 408 on the default
+# 1 MB buffer. Set only when this machine has no value, so a deliberate local choice is kept.
+if [ -z "$(git config --global --get http.postBuffer)" ]; then
+    git config --global http.postBuffer 157286400
+    echo "✓ git http.postBuffer set to 157286400"
+fi
+
 # ── settings.json (deep merge: repo wins on tracked keys) ───────────────────
 SETTINGS_PATH="$CLAUDE_DIR/settings.json"
 REPO_SETTINGS="$REPO_DIR/settings.json"
