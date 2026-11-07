@@ -52,7 +52,12 @@ else
     [ -z "$GOBIN" ] && GOBIN="$(go env GOPATH)/bin"
     RW_BIN="$GOBIN/robert-mcp"
     [ -x "$RW_BIN.exe" ] && RW_BIN="$RW_BIN.exe"
-    "$RW_BIN" register --user --config "$RW_DIR/config.yaml" | sed 's/^/  /'
+    # Newer robert-mcp releases dropped `register`; the server stays registered from the earlier install.
+    if "$RW_BIN" register -h >/dev/null 2>&1; then
+        "$RW_BIN" register --user --config "$RW_DIR/config.yaml" | sed 's/^/  /'
+    else
+        claude mcp get robert-mcp >/dev/null 2>&1 || echo "⚠ robert-mcp is not registered and this release has no register command: claude mcp add --scope user robert-mcp -- $RW_BIN serve --config $RW_DIR/config.yaml"
+    fi
     "$RW_BIN" install --source "$RW_DIR" | sed 's/^/  /'
     echo "✓ robert-mcp registered + assets installed"
 fi
