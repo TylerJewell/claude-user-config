@@ -14,6 +14,9 @@ Tyler's portable Claude Code and Codex user configuration - global instructions,
 | `hooks/pre-akka-push.sh` | `~/.claude/hooks/` | Blocks `git push` of a feature branch in an `akka` org repo until `/akka-pr-review` has passed on it |
 | `skills/fe-build/` | `~/.claude/skills/fe-build/` | `/fe-build` skill for Angular + Akka build pipeline |
 | `skills/akka-pr-review/` | `~/.claude/skills/akka-pr-review/` | `/akka-pr-review` skill: independent pre-push review of a branch headed for an `akka` org PR |
+| `skills/html-phone-check/` | `~/.claude/skills/html-phone-check/` | `/html-phone-check`: renders an HTML page at phone widths with scripts on and off (WebKit and Chromium) and reports sideways scroll, missing text and script errors; run before sending a page |
+| `skills/akka-presentation/` | `~/.claude/skills/akka-presentation/` | Tyler's standard for every deck, keynote, briefing and narrated demo film: storyboard first, one idea per scene, the Akka visual language, complete plain sentences |
+| `hooks/_python.sh` | `~/.claude/hooks/` | Sourced by the hooks and installers to find a working Python 3. On Windows `python3` is a Store stub that does nothing, so it tries `py -3` first |
 | `akka-mcp-gateway` (registered by `install.sh`) | `~/.claude.json` at user scope | Company MCP gateway at `https://mcp.akka.services/mcp` — Slack, Gmail, Google Calendar, Google Drive, HubSpot, Okta, and Groundcover. Requires the `claude` CLI on PATH. Authentication is per-machine: run `/mcp` and sign in through Okta. |
 | `robert-mcp/` (cloned, gitignored) | `go install` + registers in `~/.claude.json`, symlinks `rw-*` assets into `~/.claude/` | 82 narrow MCP dev tools (git/go/cargo/mvn/sbt/gh/docker/buf/jq/akka) plus `rw-walk-through` skill. Requires Go on PATH; on Windows, requires Developer Mode enabled for symlink creation. |
 | `codex/` | `~/.codex` and project roots | Portable Codex MCP/config templates and AGENTS.md guidance |
@@ -51,6 +54,14 @@ bash install-codex.sh --project /path/to/project
 The Codex installer updates only the managed reusable block in `~/.codex/config.toml`, preserving trusted projects and local preferences outside that block. It does not copy `auth.json`, history, logs, sessions, SQLite state, caches, or other machine-local runtime files.
 
 Codex command approvals are intentionally documented in `codex/command-approvals.md` instead of copied from runtime state.
+
+## Windows
+
+`python` and `python3` are Microsoft Store stubs on most Windows machines. The installers and the hooks that need Python source `hooks/_python.sh`, which runs each candidate (`py -3`, `python3`, `python`) and uses the first that works. Before that, `install.sh` could not merge `settings.json` on Windows and the `pre-akka-push` hook failed open, so the akka-org review was not enforced there.
+
+## Subagents
+
+`settings.json` sets `CLAUDE_CODE_SUBAGENT_MODEL=haiku`, so every subagent runs on the cheaper model. It overrides a model set in an agent's own file, so a project whose agents need a stronger model sets its own value in that project's `.claude/settings.local.json`.
 
 ## Update
 

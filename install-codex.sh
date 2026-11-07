@@ -51,7 +51,9 @@ END_MARKER="# END claude-user-config codex managed"
 TMP_CONFIG="$(mktemp)"
 trap 'rm -f "$TMP_CONFIG"' EXIT
 
-python3 - "$CONFIG_TARGET" "$CONFIG_SOURCE" "$BEGIN_MARKER" "$END_MARKER" > "$TMP_CONFIG" <<'PYEOF'
+. "$REPO_DIR/hooks/_python.sh"
+[ -n "$PYTHON" ] || { echo "⚠ no working Python 3 found (python3 may be a Windows Store stub)"; exit 1; }
+$PYTHON - "$CONFIG_TARGET" "$CONFIG_SOURCE" "$BEGIN_MARKER" "$END_MARKER" > "$TMP_CONFIG" <<'PYEOF'
 import re
 import sys
 from pathlib import Path

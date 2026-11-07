@@ -1,8 +1,10 @@
 #!/bin/bash
 # Fires after Edit/Write. If a frontend source file was edited, reminds about the build step.
 # Designed for Angular + Akka projects where built assets must be copied to Java static resources.
+. "$(dirname "$0")/_python.sh"
+[ -n "$PYTHON" ] || exit 0
 input=$(cat)
-file_path=$(echo "$input" | python3 -c "
+file_path=$(echo "$input" | $PYTHON -c "
 import sys, json
 try:
     d = json.loads(sys.stdin.read())

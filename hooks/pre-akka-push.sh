@@ -10,7 +10,10 @@
 #
 # Exits silently for everything that isn't such a push.
 
-FIELDS=$(python3 -c "
+. "$(dirname "$0")/_python.sh"
+[ -n "$PYTHON" ] || exit 0
+
+FIELDS=$($PYTHON -c "
 import json, sys
 d = json.load(sys.stdin)
 print((d.get('tool_input') or {}).get('command', '').replace(chr(10), ' '))

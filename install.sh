@@ -74,22 +74,23 @@ else
     echo "✓ $GATEWAY_NAME registered — run /mcp to authenticate"
 fi
 
-# ── mcp-gsheets (Google Sheets via personal service account) ────────────────
+# ── mcp-gsheets (Google Sheets via the Elkridge service account) ────────────
 # Uses freema/mcp-gsheets (Node stdio server) authenticated with a Google Cloud
-# service account key. Tied to Tyler's personal Google Cloud project, not any
-# akka.io account.
+# service account key from Elkridge's project, elkridge-deal-tools. Not an akka.io
+# account and not a personal one.
 #
 # Per-machine prerequisite (do these once on each machine):
-#   1. Download the service account JSON key from the sheets-mcp GCP project
-#      and place it at $HOME/.gcp/mcp-gsheets-key.json (600 perms).
-#   2. Share any Google Sheet you want Claude to touch with the service
-#      account's email: mcp-gsheets@sheets-mcp-508419.iam.gserviceaccount.com
+#   1. Create this machine's own key on elkridge-deal-tools and place it at
+#      $HOME/.gcp/mcp-gsheets-key.json (600 perms). The steps are in the smb repo's
+#      template/SETUP.md, "Moving a machine to the Elkridge account".
+#   2. Sheets the service account may touch are the ones in the Deal Models drive:
+#      deal-tools@elkridge-deal-tools.iam.gserviceaccount.com
 #
 # The key never lives in this repo. Registration is skipped gracefully if the
 # key file isn't present on this machine.
 SHEETS_NAME="mcp-gsheets"
 SHEETS_KEY="$HOME/.gcp/mcp-gsheets-key.json"
-SHEETS_PROJECT="sheets-mcp-508419"
+SHEETS_PROJECT="elkridge-deal-tools"
 if ! command -v claude >/dev/null 2>&1; then
     echo "⚠ claude not found on PATH — skipping $SHEETS_NAME registration"
 elif ! command -v npx >/dev/null 2>&1; then
@@ -118,7 +119,12 @@ else
     # Backup is only written when the merged output actually differs from the
     # existing file, so repeated no-op runs (e.g. from the SessionStart hook)
     # don't litter ~/.claude with dozens of identical backups.
-    python3 - "$SETTINGS_PATH" "$REPO_SETTINGS" <<'PYEOF'
+    . "$REPO_DIR/hooks/_python.sh"
+    if [ -z "$PYTHON" ]; then
+        echo "⚠ no working Python 3 found (python3 may be a Windows Store stub; try the py launcher) — settings.json not merged"
+        exit 1
+    fi
+    $PYTHON - "$SETTINGS_PATH" "$REPO_SETTINGS" <<'PYEOF'
 import sys, json, shutil, datetime
 
 existing_path = sys.argv[1]
