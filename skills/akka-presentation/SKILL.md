@@ -5,9 +5,9 @@ description: Tyler's standard for every presentation, deck, keynote, briefing, c
 
 # Akka presentation standard
 
-Tyler's bar is the main Akka demo: `C:\Users\tyler\ai-console\demo\mock` (the animated film),
+Tyler's bar is the main Akka demo: `C:\Users\tyler\competition\website\demo\mock` (the animated film),
 `demo\talk` (the governance keynote) and `demo\full` (the recorded console demo). Every new presentation
-is held to that bar. It came out professional because of the method below, not because of one prompt.
+is held to that bar. Every film and deck is built in `competition\website\demo`, and each `demo\` path below is under `competition\website\`; product screens and facts come from ai-console. It came out professional because of the method below, not because of one prompt.
 Follow the method in order; skipping the storyboard or cramming a frame is what made weaker decks fail.
 
 ## 1. Understand before designing
@@ -54,6 +54,10 @@ Write `storyboard.md` first and show it before building:
   work travels the connector being spoken about.
 - Projector and screen-share sizes: headlines 64–84 px, body 26–36 px, labels 20–26 px, on 1920×1080 with
   150 px gutters. Nothing overlaps, nothing runs off the stage.
+- **Show the real product.** Animated diagrams alone are not enough. Akka's console and its generated
+  artifacts (the Story, the component reference, architecture and sequence diagrams, Design and Changes,
+  exit conditions, evidence) are among the strongest visuals there are. Capture them at high resolution and
+  place them throughout, framed and animated with pans, zooms and highlights on the part being spoken about.
 
 ## 5. Language
 
@@ -63,6 +67,10 @@ Write `storyboard.md` first and show it before building:
   pitch, no claims the evidence does not carry.
 - No negative framing ("no cloud stack", "not on the critical path"); say what is, positively.
 - Never write "event store" or "design target".
+- Never imply that every Akka system has the same design ("a standard architecture"). Each system is its own
+  design, composed from Akka's components, which can be combined into any enterprise system.
+- The innovation engine accelerates any idea, an AI system or any IT system. Modernizing existing systems is
+  one use of it. Akka collapses an IT roadmap, so plans set for 2028 and 2029 can be delivered in 2027.
 - Do not set the customer's dates or tell them what must happen by when; offer milestones "to target with
   you" and "to discuss together". The customer sets the plan.
 - A customer-facing opening is personal: greet the named people, say what we appreciate, then the overview.
@@ -84,6 +92,18 @@ Write `storyboard.md` first and show it before building:
   `node demo/sample/tts.mjs --dir=<film folder>` with Tyler Pro (`ELEVENLABS_VOICE_ID=Bnd74uonOEZYmdUm8SZs`
   until the user variable is updated), `eleven_multilingual_v2`, `ELEVENLABS_OUTPUT_FORMAT=mp3_44100_192`,
   no voice_settings, no denoise.
+- **One clip per sentence, cut at the speech.** Tyler Pro opens each clip with about 100 ms of intake noise and
+  trails off for about a second after the last word; after a pause both are heard as a breath. Write
+  `sentences/narration.json` (ids like `2.1.3`), generate it with `tts.mjs --dir=<film>/sentences`, then run the
+  film's `film/assemble.mjs` (copy `demo	okenomicsilmssemble.mjs` and `pacing.config.json`; set its `cards`
+  list). It measures 10 ms RMS against the clip's 98th-percentile level and cuts from 45 ms before the onset (three
+  frames above peak −14 dB) to 70 ms after the offset (two frames above peak −40 dB), with a 20 ms fade in and a
+  90 ms fade out, then joins the sentences with the pause. The −40 dB offset keeps a closing /s/ or /z/; −27 dB cut
+  words such as "goes" and "savings" short. A pause can then fall only between sentences.
+- Pause and tail: 2.8 s and 3.4 s for a spacious film, about 0.7 to 1.2 s and 1.0 to 1.5 s for a dense one. Add
+  `<script src="pacing.js">` before the player. Never use the renderer's `--roomtone`: the noise is audible as static.
+- A spoken list of three or more items takes a comma before its last item ("a flow sequence, and an API
+  reference"). Without that comma the voice runs the last two items together and the list sounds machine-read.
 - Names and terms the voice misreads go in `SPOKEN` in `tts.mjs`; generate a few spellings in context, let
   Tyler pick, and pin the chosen take as the cached clip.
 - Render with the film renderer pattern (`demo\rbc\film\render.mjs`): each beat animates, its line starts
@@ -91,11 +111,11 @@ Write `storyboard.md` first and show it before building:
   the music bed (`demo\mock\sound\music.mp3`) sits ~18 dB under the voice and ducks a further 18 dB under each
   line on a fixed curve; one fixed gain to −16 LUFS, −1.8 dBTP; AAC 192k 48 kHz; SRT captions.
 - Checks before handing over: length; `blackdetect` shows no dark run over 1.2 s outside cards; integrated
-  loudness −16 to −17.5 LUFS; no gap between lines over 4.5 s; a contact sheet of frames across the film.
+  loudness −16 to −17.5 LUFS; no gap between lines over 4.5 s; the quietest one-second `astats` windows near −75 dBFS; a contact sheet of frames across the film.
   Copy the MP4, silent MP4 and SRT to Downloads and open the MP4 in Edge.
 
 ## 8. When Tyler corrects something
 
 Fix it everywhere it applies, then add the rule here (or to the project's README rules) so it holds for
-every future presentation. When the method itself changes, update `ai-console\demo\storytelling.md`, the
+every future presentation. When the method itself changes, update `competition\website\demo\storytelling.md`, the
 write-up that explains to colleagues how the demos are made.
