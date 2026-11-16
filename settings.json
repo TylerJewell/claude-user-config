@@ -10,7 +10,7 @@
       "WebFetch",
       "mcp__akka__*",
       "mcp__plugin_akka_akka__*",
-      "mcp__robert-mcp__*",
+      "mcp__roberts-mcp__*",
       "mcp__claude_ai_Akka_MCP_Gateway__*",
       "mcp__claude_ai_Asana__*",
       "mcp__claude_ai_Atlassian__*",

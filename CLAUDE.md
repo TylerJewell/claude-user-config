@@ -158,15 +158,15 @@ The review runs in a fresh agent that is not told how the change was made, so it
 forms its own judgment about the root cause. It is read-only: it never edits,
 commits, or switches branches.
 
-## robert-mcp tooling (prefer over Bash)
+## roberts-mcp tooling (prefer over Bash)
 
-The `robert-mcp` MCP server exposes narrow, purpose-built tools. Use them in place of Bash for the operations
+The `roberts-mcp` MCP server exposes narrow, purpose-built tools. Use them in place of Bash for the operations
 they cover. Tool schemas are deferred: load one with ToolSearch, using the full name from the deferred tool list
-(`select:mcp__robert-mcp__git_log`), before calling it.
+(`select:mcp__roberts-mcp__git_log`), before calling it.
 
-Coverage by prefix: `git_*` (everything except push, remote and bundle), `gh_*` (pr_{list,view,checks,
-review_comment,review_submit}, issue_{list,view,comment}, api GET), `go_*`, `gopls_*`, `cargo_*`, `rustup_*`,
-`mvn_*`, `sbt_*`, `docker_*`, `buf_*`, `akka_release_summary`, `jq_file`.
+Coverage by prefix: `git_*` (everything except push, remote and bundle; `git_mv` moves or renames tracked files),
+`gh_*` (pr_{list,view,checks,review_comment,review_submit}, issue_{list,view,comment,create}, api GET),
+`go_*`, `gopls_*`, `cargo_*`, `rustup_*`, `mvn_*`, `sbt_*`, `docker_*`, `buf_*`, `akka_release_summary`, `jq_file`.
 
 Replacements: any `git <verb>` that is not push-family becomes `git_<verb>`; `go mod tidy|get|list` becomes
 `go_mod_tidy|go_get|go_list`; `cargo <verb>` becomes `cargo_<verb>`; `mvn <goal>` becomes `mvn_<goal>` (`clean: true`

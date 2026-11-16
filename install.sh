@@ -32,38 +32,72 @@ for skill_dir in "$REPO_DIR/skills"/*/; do
     echo "✓ skills/$skill_name/ → ~/.claude/skills/$skill_name/"
 done
 
-# ── robert-mcp (clone, build, register, install assets) ─────────────────────
-# robert-mcp is cloned as a subdirectory of this repo (gitignored). It's
+# ── roberts-mcp (clone, build, register, install assets) ────────────────────
+# The repository is akka/robert-mcp; the binary and the MCP server are named
+# roberts-mcp. It is cloned as a subdirectory of this repo (gitignored) and
 # updated on every install.sh run so machines stay in sync with upstream.
 # Skipped gracefully if `go` isn't on PATH.
 RW_DIR="$REPO_DIR/robert-mcp"
 if ! command -v go >/dev/null 2>&1; then
-    echo "⚠ go not found on PATH — skipping robert-mcp install"
+    echo "⚠ go not found on PATH — skipping roberts-mcp install"
 else
     if [ -d "$RW_DIR/.git" ]; then
         (cd "$RW_DIR" && git pull --ff-only 2>&1 | sed 's/^/  /')
-        echo "✓ robert-mcp pulled"
+        echo "✓ roberts-mcp pulled"
     else
         git clone https://github.com/akka/robert-mcp.git "$RW_DIR" 2>&1 | sed 's/^/  /'
-        echo "✓ robert-mcp cloned"
+        echo "✓ roberts-mcp cloned"
     fi
-    (cd "$RW_DIR" && go install .)
     GOBIN="$(go env GOBIN)"
     [ -z "$GOBIN" ] && GOBIN="$(go env GOPATH)/bin"
-    RW_BIN="$GOBIN/robert-mcp"
-    [ -x "$RW_BIN.exe" ] && RW_BIN="$RW_BIN.exe"
-    # Newer robert-mcp releases dropped `register`; the server stays registered from the earlier install.
-    if "$RW_BIN" register -h >/dev/null 2>&1; then
-        "$RW_BIN" register --user --config "$RW_DIR/config.yaml" | sed 's/^/  /'
-    else
-        claude mcp get robert-mcp >/dev/null 2>&1 || echo "⚠ robert-mcp is not registered and this release has no register command: claude mcp add --scope user robert-mcp -- $RW_BIN serve --config $RW_DIR/config.yaml"
+    RW_EXT=""
+    [ "$(go env GOOS)" = "windows" ] && RW_EXT=".exe"
+    RW_BIN="$GOBIN/roberts-mcp$RW_EXT"
+    # `go install` names the binary after the module path (robert-mcp), which
+    # is not the name the server is registered under, so build to the name.
+    (cd "$RW_DIR" && go build -o "$RW_BIN" .)
+    echo "✓ roberts-mcp built → $RW_BIN"
+
+    # config.yaml is machine-local and git-ignored. git_mv is refused unless
+    # `mv` is in the allowed git commands, and a config written before git_mv
+    # existed does not list it.
+    RW_CONFIG="$RW_DIR/config.yaml"
+    [ -f "$RW_CONFIG" ] || cp "$RW_DIR/config.example.yaml" "$RW_CONFIG"
+    if ! grep -q '^ *- mv$' "$RW_CONFIG"; then
+        awk '{print} /^ *- restore$/ {sub(/restore/, "mv"); print}' "$RW_CONFIG" > "$RW_CONFIG.tmp" && mv "$RW_CONFIG.tmp" "$RW_CONFIG"
+        echo "✓ config.yaml: added mv to the allowed git commands"
     fi
+
+    # Claude Code on Windows spawns the server with a native path.
+    RW_BIN_ARG="$RW_BIN"; RW_CONFIG_ARG="$RW_CONFIG"
+    if command -v cygpath >/dev/null 2>&1; then
+        RW_BIN_ARG="$(cygpath -w "$RW_BIN")"; RW_CONFIG_ARG="$(cygpath -w "$RW_CONFIG")"
+    fi
+    if ! command -v claude >/dev/null 2>&1; then
+        echo "⚠ claude not found on PATH — register by hand: claude mcp add --scope user roberts-mcp -- $RW_BIN_ARG serve --config $RW_CONFIG_ARG"
+    else
+        # A registration under the old server name points at a binary that is no longer built.
+        if claude mcp get robert-mcp >/dev/null 2>&1; then
+            claude mcp remove --scope user robert-mcp 2>&1 | sed 's/^/  /'
+        fi
+        if claude mcp get roberts-mcp >/dev/null 2>&1; then
+            echo "✓ roberts-mcp already registered"
+        else
+            claude mcp add --scope user roberts-mcp -- "$RW_BIN_ARG" serve --config "$RW_CONFIG_ARG" 2>&1 | sed 's/^/  /'
+        fi
+    fi
+    # The binary built under the old name. Windows refuses to delete it while a
+    # running Claude Code session still has it open; the next run removes it.
+    rm -f "$GOBIN/robert-mcp$RW_EXT" 2>/dev/null || echo "⚠ $GOBIN/robert-mcp$RW_EXT is in use — restart Claude Code and re-run to remove it"
+
+    # uninstall first, so links to assets that upstream removed go too.
+    "$RW_BIN" uninstall | sed 's/^/  /'
     "$RW_BIN" install --source "$RW_DIR" | sed 's/^/  /'
-    echo "✓ robert-mcp registered + assets installed"
+    echo "✓ roberts-mcp assets installed"
 fi
 
 # ── akka-mcp-gateway (company MCP gateway) ──────────────────────────────────
-# Registered at user scope so every project sees it, matching robert-mcp.
+# Registered at user scope so every project sees it, matching roberts-mcp.
 # Authentication is per-machine and interactive — run /mcp in Claude Code and
 # sign in through Okta. No credential belongs in this repo.
 # The scope is matched, not just the name: a registration that exists only at
