@@ -158,6 +158,12 @@ The review runs in a fresh agent that is not told how the change was made, so it
 forms its own judgment about the root cause. It is read-only: it never edits,
 commits, or switches branches.
 
+Before that review, and before every push to akka/cli, lightbend/kalix-console,
+akka/akka-sdk or akka/ai-marketplace, run `/pre-push`: the repository's CI checks,
+run locally. The push hook refuses a push without its current report. Load
+`/design-checklist` before designing a route, data path, command or feature, and
+include it in every implementation agent's brief.
+
 ## roberts-mcp tooling (prefer over Bash)
 
 The `roberts-mcp` MCP server exposes narrow, purpose-built tools. Use them in place of Bash for the operations

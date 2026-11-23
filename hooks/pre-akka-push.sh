@@ -1,12 +1,15 @@
 #!/bin/bash
-# Fires before Bash/PowerShell tool calls. Blocks `git push` of a feature branch in
-# an akka-org repo until an /akka-pr-review report exists for that branch and is
-# newer than the branch tip.
+# Fires before Bash/PowerShell tool calls. Blocks `git push` of a feature branch
+# until the /pre-push checks report for that branch exists, is newer than the
+# branch tip and says "Checks: PASS". In an akka-org repo it also requires an
+# /akka-pr-review report that is newer than the tip and says READY TO PUSH.
+# lightbend/kalix-console needs the checks report only.
 #
 # A review written before the last few commits describes code that is no longer
 # being pushed, so staleness is treated the same as absence.
 #
-# Escape hatch: prefix the command with AKKA_PR_REVIEW_SKIP=1.
+# Escape hatches: prefix the command with AKKA_PR_REVIEW_SKIP=1 (skips both) or
+# PRE_PUSH_SKIP=1 (skips the checks report only).
 #
 # Exits silently for everything that isn't such a push.
 
@@ -33,7 +36,8 @@ esac
 
 REMOTE=$(git remote get-url origin 2>/dev/null) || exit 0
 case "$REMOTE" in
-    *github.com/akka/*|*github.com:akka/*) ;;
+    *github.com/akka/*|*github.com:akka/*) NEEDS_REVIEW=1 ;;
+    *github.com/lightbend/kalix-console*|*github.com:lightbend/kalix-console*) NEEDS_REVIEW= ;;
     *) exit 0 ;;
 esac
 
@@ -49,6 +53,32 @@ esac
 
 REPO=$(basename -s .git "$REMOTE")
 REPORT="$HOME/.claude/reviews/$REPO-${BRANCH//\//-}-review.md"
+CHECKS="$HOME/.claude/reviews/$REPO-${BRANCH//\//-}-checks.md"
+TIP=$(git log -1 --format=%ct 2>/dev/null)
+
+written() { stat -c %Y "$1" 2>/dev/null || stat -f %m "$1" 2>/dev/null; }
+
+case "$COMMAND" in
+    *PRE_PUSH_SKIP=1*) ;;
+    *)
+        fail_checks() {
+            echo "BLOCKED: $1" >&2
+            echo "Run /pre-push on this branch, then push." >&2
+            echo "  repo:   $REPO  branch: $BRANCH" >&2
+            echo "  report: $CHECKS" >&2
+            echo "To push without the checks: prefix the command with PRE_PUSH_SKIP=1" >&2
+            exit 2
+        }
+        [ -f "$CHECKS" ] || fail_checks "no pre-push checks report for this branch."
+        W=$(written "$CHECKS")
+        if [ -n "$TIP" ] && [ -n "$W" ] && [ "$W" -lt "$TIP" ]; then
+            fail_checks "the checks report predates the branch tip."
+        fi
+        head -n 5 "$CHECKS" | grep -q '^Checks: PASS' || fail_checks "the checks report does not say Checks: PASS."
+        ;;
+esac
+
+[ -n "$NEEDS_REVIEW" ] || exit 0
 
 block() {
     echo "BLOCKED: $1" >&2
@@ -62,8 +92,7 @@ block() {
 
 [ -f "$REPORT" ] || block "no independent review report for this branch."
 
-TIP=$(git log -1 --format=%ct 2>/dev/null)
-WRITTEN=$(stat -c %Y "$REPORT" 2>/dev/null || stat -f %m "$REPORT" 2>/dev/null)
+WRITTEN=$(written "$REPORT")
 if [ -n "$TIP" ] && [ -n "$WRITTEN" ] && [ "$WRITTEN" -lt "$TIP" ]; then
     block "the review report predates the branch tip — it reviewed different code."
 fi

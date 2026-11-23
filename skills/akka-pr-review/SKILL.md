@@ -41,7 +41,12 @@ End the statement with exactly:
 
 > That is the problem and intent only — work out the cause and judge the solution yourself.
 
-## 4. Launch the reviewer
+## 4. Run the pre-push checks first
+
+Run `/pre-push` on the branch before launching the reviewer. A reviewer's time on
+format, lint, races or a failing suite is time not spent on design.
+
+## 5. Launch the reviewer
 
 Spawn **one** `general-purpose` agent (fresh context — do not use a fork, and do
 not summarise the change for it). Its prompt is the block below with `<REPO>`,
@@ -84,6 +89,26 @@ fine and encouraged.
   unrelated, leftover, vendored, or out of scope, however small.
 - **Regression risk** — what else could this affect? Note what's worth running.
 - **Quality** — style consistency, logging, naming.
+- **Design checklist** — read `~/.claude/skills/design-checklist/SKILL.md` and
+  answer each question that applies to this change. Every "no" is a finding.
+- **Guard deletion** — for each guard the change adds (a bound, a check, a
+  refusal, a lock, a filter), remove it in a throwaway copy (`go test -overlay`,
+  a scratch file, or a stash you restore) and run its tests. A test suite that
+  still passes without the guard is a [should-fix]: the guard is untested.
+- **Other platforms** — does anything assume Windows only, or break on macOS and
+  Linux (`python3`, `mvnw`, path separators, case-sensitive file systems)?
+- **Released versions** — does it rely on a flag, route, field or template that
+  the released CLI, plugin, Optimize or SDK lacks? If so, is the dependency and
+  release order stated?
+- **PR description** — if a PR exists (`gh pr view --json body`), does its
+  description match the diff, name what it depends on, and state the release
+  order? A description that claims what the diff does not do is a [should-fix].
+- **Hygiene** — no references to private repositories, internal documents,
+  customer names, or real email addresses other than examples; no pseudo-version
+  pins to unmerged commits; no AI attribution in commits or the description.
+- **Size** — count non-test lines changed
+  (`git diff --numstat <BASE>...HEAD`, excluding test, testdata and fixture
+  files). Over about 2,000 is a [should-fix] that proposes how to split it.
 
 ## Output
 Write your review as Markdown to **`<REPORT PATH>`** (create the parent directory
@@ -98,7 +123,7 @@ Keep it concise — a pre-push sanity review, not a full audit. End your turn by
 printing the verdict line to stdout too, so it also lands in the run log.
 ```
 
-## 5. Report back
+## 6. Report back
 
 Print the verdict line and the report path. Then list the findings, most severe
 first. Do not act on them — the user decides what to fix and whether to push.
@@ -109,5 +134,18 @@ Never push as part of this skill.
 
 The `pre-akka-push` hook denies a `git push` from an akka-org feature branch unless
 this skill's report exists for the branch, is newer than the branch tip, and says
-`READY TO PUSH`. So a report that goes stale behind new commits stops being
+`READY TO PUSH`, and unless the `/pre-push` checks report for the branch is newer
+than the tip and says `Checks: PASS`. So a report that goes stale behind new commits stops being
 sufficient — re-run the skill after amending the branch.
+
+## Re-review after fixes (keep the cycle fast)
+
+When a review returned NEEDS WORK and fixes were committed, the re-review covers
+only the commits since the last reviewed tip, not the whole branch: give the
+reviewer that commit as its base (`git diff <last-reviewed-tip>...HEAD`), the
+previous report's findings, and the same problem statement, and ask it to confirm
+each finding is fixed, check the new commits, rerun the tests, and overwrite the
+report. Fix only blockers and should-fix findings; nits go in the PR description,
+never into a fix round. In a stacked series, merge the stack up once after all
+pieces' fixes are in; a piece whose only new commit is a merge gets a test run,
+then a short re-review of that merge, not a full review.
